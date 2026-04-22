@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="inertial_macros.xacro" />
+
+  <!-- ── MATERIALS ─────────────────────────────────────────────────────── -->
+  <material name="white">  <color rgba="0.92 0.92 0.92 1"/></material>
+  <material name="orange"> <color rgba="1.0  0.45 0.05 1"/></material>
+  <material name="blue">   <color rgba="0.15 0.35 0.85 1"/></material>
+  <material name="black">  <color rgba="0.05 0.05 0.05 1"/></material>
+  <material name="red">    <color rgba="0.85 0.1  0.1  1"/></material>
+  <material name="yellow"> <color rgba="1.0  0.85 0.0  1"/></material>
+
+  <!-- ── BASE LINK ─────────────────────────────────────────────────────── -->
+  <link name="base_link"/>
+
+  <!-- ── CHASSIS ───────────────────────────────────────────────────────── -->
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="chassis"/>
+    <origin xyz="-0.1 0 0"/>
+  </joint>
+
+  <link name="chassis">
+    <visual>
+      <origin xyz="0.15 0 0.075" rpy="0 0 0"/>
+      <geometry><box size="0.30 0.28 0.12"/></geometry>
+      <material name="white"/>
+    </visual>
+    <collision>
+      <origin xyz="0.15 0 0.075" rpy="0 0 0"/>
+      <geometry><box size="0.30 0.28 0.12"/></geometry>
+    </collision>
+    <xacro:inertial_box mass="0.6" x="0.30" y="0.28" z="0.12">
+      <origin xyz="0.15 0 0.075" rpy="0 0 0"/>
+    </xacro:inertial_box>
+  </link>
+  <gazebo reference="chassis">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <!-- ── IMPROVEMENT: coloured front bumper strip ──────────────────────── -->
+  <joint name="bumper_joint" type="fixed">
+    <parent link="chassis"/>
+    <child  link="bumper"/>
+    <origin xyz="0.295 0 0.045" rpy="0 0 0"/>
+  </joint>
+  <link name="bumper">
+    <visual>
+      <geometry><box size="0.01 0.28 0.03"/></geometry>
+      <material name="orange"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.01 0.28 0.03"/></geometry>
+    </collision>
+    <xacro:inertial_box mass="0.02" x="0.01" y="0.28" z="0.03">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_box>
+  </link>
+  <gazebo reference="bumper">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <!-- ── LEFT WHEEL ────────────────────────────────────────────────────── -->
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="left_wheel"/>
+    <origin xyz="0 0.175 0" rpy="-${pi/2} 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="left_wheel">
+    <visual>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+    </collision>
+    <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.05">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+  <gazebo reference="left_wheel">
+    <material>Gazebo/Blue</material>
+    <!-- IMPROVEMENT: realistic rubber friction -->
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+
+  <!-- ── RIGHT WHEEL ───────────────────────────────────────────────────── -->
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="right_wheel"/>
+    <origin xyz="0 -0.175 0" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 -1"/>
+  </joint>
+  <link name="right_wheel">
+    <visual>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+    </collision>
+    <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.05">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_cylinder>
+  </link>
+  <gazebo reference="right_wheel">
+    <material>Gazebo/Blue</material>
+    <mu1>0.9</mu1>
+    <mu2>0.9</mu2>
+  </gazebo>
+
+  <!-- ── CASTER WHEEL ──────────────────────────────────────────────────── -->
+  <joint name="caster_wheel_joint" type="fixed">
+    <parent link="chassis"/>
+    <child  link="caster_wheel"/>
+    <!-- IMPROVEMENT: moved caster further back for better stability -->
+    <origin xyz="0.01 0 0.01" rpy="0 0 0"/>
+  </joint>
+  <link name="caster_wheel">
+    <visual>
+      <geometry><sphere radius="0.05"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><sphere radius="0.05"/></geometry>
+    </collision>
+    <xacro:inertial_sphere mass="0.1" radius="0.05">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </xacro:inertial_sphere>
+  </link>
+  <gazebo reference="caster_wheel">
+    <material>Gazebo/Black</material>
+    <!-- Near-zero friction so it rolls freely in all directions -->
+    <mu1>0.001</mu1>
+    <mu2>0.001</mu2>
+  </gazebo>
+
+  <!-- ── LIDAR MOUNT ────────────────────────────────────────────────────── -->
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="laser_frame"/>
+    <!-- IMPROVEMENT: centred on base_link for accurate scan transforms -->
+    <origin xyz="0.1 0 0.18" rpy="0 0 0"/>
+  </joint>
+  <link name="laser_frame">
+    <visual>
+      <geometry><cylinder radius="0.04" length="0.04"/></geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.04" length="0.04"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.08"/>
+      <inertia ixx="0.001" ixy="0" ixz="0"
+               iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+</robot>
